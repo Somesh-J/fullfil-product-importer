@@ -20,8 +20,15 @@ COPY . .
 # Create uploads directory
 RUN mkdir -p /uploads
 
+# Copy and make entrypoint script executable
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose application port
 EXPOSE 8000
 
-# Default command (overridden by docker-compose)
+# Use entrypoint script to run migrations before starting app
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Default command (can be overridden)
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
