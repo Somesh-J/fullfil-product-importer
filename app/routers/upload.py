@@ -159,6 +159,30 @@ async def stream_progress(job_id: str):
             initial_msg = json.dumps({"status": "connected", "job_id": job_id})
             yield f"data: {initial_msg}\n\n"
             
+            # Check if job already has a status (for fast imports that complete during SSE connection)
+            from app.models import ImportJob
+            from app.db import AsyncSessionLocal
+            async with AsyncSessionLocal() as db_session:
+                result = await db_session.execute(
+                    select(ImportJob).where(ImportJob.id == job_id)
+                )
+                job = result.scalar_one_or_none()
+                if job and job.status in ['complete', 'failed', 'cancelled']:
+                    # Job already finished, send final status immediately
+                    final_status = {
+                        "status": job.status if job.status != 'failed' else 'error',
+                        "processed": job.processed_rows or 0,
+                        "inserted": 0,
+                        "updated": job.processed_rows or 0,
+                        "percent": 100,
+                        "message": f"Import {'completed' if job.status == 'complete' else job.status}!"
+                    }
+                    if job.error:
+                        final_status["error"] = job.error
+                    print(f"[SSE] Job {job_id} already finished with status: {job.status}, sending final status")
+                    yield f"data: {json.dumps(final_status)}\n\n"
+                    return
+            
             # Listen for messages
             message_count = 0
             async for message in pubsub.listen():
