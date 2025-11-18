@@ -210,13 +210,7 @@ def import_csv_task(self, job_id: str):
         
         print(f"[Import] Completed successfully: {processed} rows processed")
         
-        # Cleanup: Remove uploaded file
-        try:
-            if os.path.exists(file_path):
-                os.remove(file_path)
-                print(f"[Import] Deleted temporary file: {file_path}")
-        except Exception as e:
-            print(f"[Import] Warning: Could not delete file {file_path}: {e}")
+        # Note: CSV data stored in database, no file cleanup needed
             
     except Exception as e:
         error_msg = str(e)

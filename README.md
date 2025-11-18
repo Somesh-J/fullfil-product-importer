@@ -279,6 +279,7 @@ This project includes comprehensive documentation:
 | **README.md** | Quick start guide, setup instructions | You are here |
 | **Architecture** | System design, data models, tech stack | [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) |
 | **API Reference** | Complete API documentation with examples | [`Docs/API_REFERENCE.md`](Docs/API_REFERENCE.md) |
+| **Railway CSV Storage** | How CSV uploads work on Railway (database storage) | [`Docs/RAILWAY_CSV_STORAGE.md`](Docs/RAILWAY_CSV_STORAGE.md) |
 | **Project Completion** | Task checklist, requirements verification | [`Docs/PROJECT_COMPLETION.md`](Docs/PROJECT_COMPLETION.md) |
 | **AI Prompts** | Complete log of all AI interactions | [`Docs/AI_PROMPTS.md`](Docs/AI_PROMPTS.md) |
 | **Interactive API Docs** | Swagger UI for testing | `http://localhost:8000/docs` |

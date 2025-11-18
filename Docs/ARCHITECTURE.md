@@ -689,12 +689,13 @@ DATABASE_URL=${{Postgres.DATABASE_URL}}
 REDIS_URL=${{Redis.REDIS_URL}}
 CELERY_BROKER_URL=${{Redis.REDIS_URL}}
 CELERY_RESULT_BACKEND=${{Redis.REDIS_URL}}
-UPLOAD_DIR=/uploads
 IMPORT_BATCH_SIZE=10000
 CELERY_CONCURRENCY=4
 MAX_FILE_SIZE_MB=500
 ALLOWED_ORIGINS=*
 ```
+
+**Note:** `UPLOAD_DIR` removed - CSV files stored in database instead of file system.
 
 **Start Commands:**
 - Web: `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (auto-detected)
