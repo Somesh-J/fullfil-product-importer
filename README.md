@@ -44,7 +44,7 @@ This application solves the challenge of importing **large CSV files (500,000+ r
 | **Task Queue** | Celery 5.3.4 |
 | **Message Broker** | Redis 7 (Celery + SSE pub/sub) |
 | **Frontend** | Vanilla JavaScript, HTML5, CSS3 |
-| **Deployment** | Docker + Docker Compose, Render.com |
+| **Deployment** | Docker + Docker Compose, Railway.app |
 | **Validation** | Pydantic 2.5.0 |
 
 ---
@@ -305,7 +305,7 @@ This project includes comprehensive documentation:
 - ✅ Professional UI (modern, responsive design)
 - ✅ Error Handling (user-friendly messages)
 - ✅ Docker Support (local development)
-- ✅ Deployment Ready (Render.com configuration)
+- ✅ Deployment Ready (Railway.app configuration)
 
 ### Performance
 

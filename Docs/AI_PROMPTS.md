@@ -397,7 +397,7 @@ Create professional, interview-ready README.md with:
 - Tech stack table
 - Local setup (Docker Compose)
 - Database migration instructions
-- Render.com deployment guide (step-by-step)
+- Railway.app deployment guide (step-by-step)
 - API endpoint reference table
 - Architecture diagram
 - Testing section

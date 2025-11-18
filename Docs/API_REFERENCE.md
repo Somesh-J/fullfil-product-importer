@@ -1,7 +1,7 @@
 # API Reference - Product Importer
 
 **Version:** 1.0.0  
-**Base URL:** `http://localhost:8000` (local) | `https://your-app.onrender.com` (production)  
+**Base URL:** `http://localhost:8000` (local) | `https://web-production-xxxx.up.railway.app` (production)  
 **Documentation:** `/docs` (Swagger UI) | `/redoc` (ReDoc)
 
 ---

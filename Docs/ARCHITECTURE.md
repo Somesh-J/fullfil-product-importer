@@ -140,7 +140,7 @@ Build a scalable web application capable of:
 | **Frontend** | HTML/CSS/JS | Minimal UI with modern features (no React) |
 | **Real-time** | Server-Sent Events (SSE) | Live progress updates via Redis pub/sub |
 | **Containerization** | Docker + Docker Compose | Local development environment |
-| **Deployment** | Render.com | Managed web + worker + PostgreSQL + Redis |
+| **Deployment** | Railway.app | Managed web + worker + PostgreSQL + Redis |
 
 ---
 
@@ -295,7 +295,7 @@ fullfil/
 ├── requirements.txt            # Python dependencies
 ├── Dockerfile                  # Container configuration
 ├── docker-compose.yml          # Local development setup
-├── render.yaml                 # Render deployment config
+├── railway.json                # Railway deployment config (optional)
 ├── .env.example                # Environment variables template
 ├── .gitignore                  # Git ignore file
 ├── README.md                   # Project documentation
@@ -664,7 +664,7 @@ function uploadCSV(file) {
 
 ## 8. Deployment Architecture
 
-### 8.1 Deployment Platform: **Render** (Recommended)
+### 8.1 Deployment Platform: **Railway** (Recommended)
 
 **Services Required:**
 1. **Web Service** - FastAPI application
@@ -672,61 +672,33 @@ function uploadCSV(file) {
 3. **Redis** - Message broker + pub/sub
 4. **PostgreSQL** - Database
 
-### 8.2 Render Configuration (`render.yaml`)
+### 8.2 Railway Configuration
 
-```yaml
-services:
-  # FastAPI Web Service
-  - type: web
-    name: product-importer-web
-    env: python
-    runtime: python-3.11
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: product-importer-db
-          property: connectionString
-      - key: REDIS_URL
-        fromDatabase:
-          name: product-importer-redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromDatabase:
-          name: product-importer-redis
-          property: connectionString
-    
-  # Celery Worker
-  - type: worker
-    name: product-importer-worker
-    env: python
-    runtime: python-3.11
-    buildCommand: pip install -r requirements.txt
-    startCommand: celery -A app.celery_app worker --loglevel=info
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: product-importer-db
-          property: connectionString
-      - key: REDIS_URL
-        fromDatabase:
-          name: product-importer-redis
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromDatabase:
-          name: product-importer-redis
-          property: connectionString
+Railway uses automatic configuration via Dockerfile. No `railway.json` needed.
 
-databases:
-  - name: product-importer-db
-    databaseName: products
-    user: products_user
-    plan: free
+**Service Setup:**
 
-  - name: product-importer-redis
-    plan: free
+1. **PostgreSQL**: Provision via Railway dashboard, use `${{Postgres.DATABASE_URL}}`
+2. **Redis**: Provision via Railway dashboard, use `${{Redis.REDIS_URL}}`
+3. **Web Service**: Deploy from GitHub, Railway auto-detects Dockerfile
+4. **Worker Service**: Deploy from same repo, set custom start command
+
+**Environment Variables** (set in Railway dashboard):
+```bash
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+REDIS_URL=${{Redis.REDIS_URL}}
+CELERY_BROKER_URL=${{Redis.REDIS_URL}}
+CELERY_RESULT_BACKEND=${{Redis.REDIS_URL}}
+UPLOAD_DIR=/uploads
+IMPORT_BATCH_SIZE=10000
+CELERY_CONCURRENCY=4
+MAX_FILE_SIZE_MB=500
+ALLOWED_ORIGINS=*
 ```
+
+**Start Commands:**
+- Web: `uvicorn app.main:app --host 0.0.0.0 --port $PORT` (auto-detected)
+- Worker: `celery -A app.celery_app worker --loglevel=info --concurrency=4`
 
 ### 8.3 Environment Variables
 
@@ -741,7 +713,7 @@ ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
 
 ### 8.4 Timeout Handling
 
-**Problem:** Heroku/Render have 30-second HTTP timeout limits.
+**Problem:** Most platforms (Railway, Heroku) have HTTP timeout limits.
 
 **Solution:**
 1. Upload endpoint immediately returns `202 Accepted` with `task_id`
@@ -765,7 +737,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://your-app.onrender.com"],
+    allow_origins=["https://web-production-xxxx.up.railway.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -811,7 +783,7 @@ app.add_middleware(
 ### 11.1 Application Logs
 - **Level:** INFO (production), DEBUG (development)
 - **Format:** JSON structured logs
-- **Storage:** Render logs / CloudWatch
+- **Storage:** Railway logs / CloudWatch
 
 ### 11.2 Metrics to Track
 - CSV import time (avg, p95, p99)
