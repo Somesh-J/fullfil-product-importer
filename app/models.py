@@ -68,6 +68,7 @@ class ImportJob(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     filename = Column(String(512), nullable=False)
+    csv_data = Column(Text, nullable=True)  # Store CSV content for worker access
     uploader = Column(String(255), nullable=True)  # Future: user who uploaded
     status = Column(
         String(50),

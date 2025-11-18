@@ -33,15 +33,14 @@ def get_sync_redis():
 
 
 @celery_app.task(bind=True, name="app.tasks.import_csv_task")
-def import_csv_task(self, job_id: str, file_path: str):
+def import_csv_task(self, job_id: str):
     """
     Import CSV file in background with batch processing and progress updates
     
     Args:
         job_id: UUID of the ImportJob record
-        file_path: Path to uploaded CSV file
     """
-    print(f"[Task] Starting CSV import for job {job_id}, file: {file_path}")
+    print(f"[Task] Starting CSV import for job {job_id}")
     
     session = SyncSessionLocal()
     redis_client = get_sync_redis()
@@ -50,6 +49,24 @@ def import_csv_task(self, job_id: str, file_path: str):
         # Check if job is already cancelled
         if redis_client.get(f"cancel:{job_id}"):
             print(f"[Import] Job {job_id} was cancelled before starting")
+            session.close()
+            return
+        
+        # Fetch ImportJob and CSV data from database
+        import_job = session.query(ImportJob).filter(ImportJob.id == job_id).first()
+        if not import_job:
+            print(f"[Import] ERROR: Job {job_id} not found in database")
+            session.close()
+            return
+        
+        if not import_job.csv_data:
+            print(f"[Import] ERROR: No CSV data found for job {job_id}")
+            session.execute(
+                update(ImportJob)
+                .where(ImportJob.id == job_id)
+                .values(status="failed", error="No CSV data found")
+            )
+            session.commit()
             session.close()
             return
         
@@ -69,13 +86,18 @@ def import_csv_task(self, job_id: str, file_path: str):
             "message": "Starting CSV import..."
         })
         
-        # Stream and process CSV
+        # Stream and process CSV from database
+        import csv
+        import io
+        
+        csv_reader = csv.DictReader(io.StringIO(import_job.csv_data))
+        
         batch = []
         processed = 0
         total_inserted = 0
         total_updated = 0
         
-        for row in stream_csv_file(file_path):
+        for row in csv_reader:
             # Check for cancellation every few rows
             if processed % 100 == 0 and redis_client.get(f"cancel:{job_id}"):
                 print(f"[Import] Job {job_id} cancelled at {processed} rows")

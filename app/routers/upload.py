@@ -51,53 +51,43 @@ async def upload_csv(
             detail=f"Invalid content type: {file.content_type}. Expected CSV file."
         )
     
-    # Create upload directory if it doesn't exist
-    os.makedirs(UPLOAD_DIR, exist_ok=True)
-    
-    # Generate unique filename
+    # Generate unique job ID
     job_id = uuid.uuid4()
-    file_extension = os.path.splitext(file.filename)[1]
-    safe_filename = f"{job_id}{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, safe_filename)
     
-    # Save file to disk with size validation
+    # Read CSV content into memory (for Railway shared access between services)
     try:
         total_size = 0
-        with open(file_path, 'wb') as f:
-            while chunk := await file.read(8192):  # 8KB chunks
-                total_size += len(chunk)
-                
-                # Check file size limit
-                if total_size > MAX_FILE_SIZE:
-                    # Delete partially written file
-                    f.close()
-                    os.remove(file_path)
-                    raise HTTPException(
-                        status_code=413,
-                        detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
-                    )
-                
-                f.write(chunk)
+        csv_content = ""
         
-        print(f"[Upload] Saved file: {file_path} ({total_size:,} bytes)")
+        while chunk := await file.read(8192):  # 8KB chunks
+            total_size += len(chunk)
+            
+            # Check file size limit
+            if total_size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
+                )
+            
+            csv_content += chunk.decode('utf-8', errors='replace')
+        
+        print(f"[Upload] Read CSV file: {file.filename} ({total_size:,} bytes)")
         
     except HTTPException:
         raise
     except Exception as e:
-        # Clean up file on error
-        if os.path.exists(file_path):
-            os.remove(file_path)
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to save file: {str(e)}"
+            detail=f"Failed to read file: {str(e)}"
         )
     
-    # Create ImportJob record
+    # Create ImportJob record with CSV data
     async with AsyncSessionLocal() as session:
         try:
             import_job = ImportJob(
                 id=job_id,
                 filename=file.filename,
+                csv_data=csv_content,  # Store CSV in database
                 status="queued",
                 total_rows=None,
                 processed_rows=0
@@ -109,17 +99,14 @@ async def upload_csv(
             print(f"[Upload] Created ImportJob: {job_id}")
             
         except Exception as e:
-            # Clean up file on database error
-            if os.path.exists(file_path):
-                os.remove(file_path)
             raise HTTPException(
                 status_code=500,
                 detail=f"Failed to create import job: {str(e)}"
             )
     
-    # Trigger Celery task
+    # Trigger Celery task (pass job_id only, worker will fetch CSV from DB)
     try:
-        import_csv_task.delay(str(job_id), file_path)
+        import_csv_task.delay(str(job_id))
         print(f"[Upload] Triggered import task for job {job_id}")
         
     except Exception as e:
