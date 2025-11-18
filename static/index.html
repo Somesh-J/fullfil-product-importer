@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Importer - Acme Inc.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f0f0f0;
+            color: #1e1e1e;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        #header {
+            background: #1e1e1e;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #header h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            background: #555;
+        }
+
+        .tab-btn.active {
+            background: #007bff;
+        }
+
+        /* Sections */
+        .tab-section {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1e1e1e;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-primary:disabled {
+            background: #888;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #555;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #333;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            border: 3px dashed #007bff;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            background: #e7f3ff;
+            border-color: #0056b3;
+        }
+
+        .drop-zone-text {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone-hint {
+            font-size: 14px;
+            color: #888;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        progress {
+            width: 100%;
+            height: 30px;
+            border-radius: 4px;
+        }
+
+        progress::-webkit-progress-bar {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        progress::-webkit-progress-value {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        #progressText {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.8;
+            min-height: 80px;
+        }
+
+        #progressText strong {
+            font-size: 16px;
+            color: #007bff;
+            display: block;
+            margin: 5px 0;
+        }
+
+        #progressText small {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .status-log {
+            background: #1e1e1e;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .status-log-line {
+            margin-bottom: 5px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .page-info {
+            color: #555;
+            font-size: 14px;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #888;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ffc107;
+            color: #1e1e1e;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* File info */
+        .file-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .file-info strong {
+            color: #333;
+        }
+
+        /* Checkbox */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div id="header">
+        <div class="container">
+            <h1>🚀 Product Importer Dashboard</h1>
+            <p style="text-align: center; color: #ccc; margin: 10px 0 20px 0; font-size: 14px;">High-performance bulk product management system with real-time processing, webhooks, and advanced filtering</p>
+            <nav>
+                <button class="tab-btn active" onclick="switchTab('upload')">📤 Upload CSV</button>
+                <button class="tab-btn" onclick="switchTab('products')">📦 Products</button>
+                <button class="tab-btn" onclick="switchTab('webhooks')">🔔 Webhooks</button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Upload CSV Section -->
+        <div id="uploadSection" class="tab-section">
+            <h2 class="section-title">📤 Import Products from CSV</h2>
+            <div style="background: #e7f3ff; border-left: 4px solid #007bff; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #004085;"><strong>💡 Features:</strong> High-speed batch processing (10K rows/batch) • Automatic duplicate detection • Real-time progress tracking • Support for 500K+ products • Upsert (insert/update) mode</p>
+            </div>
+            
+            <div class="card">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-text">📁 Drag & Drop CSV File Here</div>
+                    <div class="drop-zone-hint">or click to browse</div>
+                    <input type="file" id="fileInput" accept=".csv" style="display: none;">
+                </div>
+
+                <div id="fileInfo" class="file-info hidden">
+                    <strong>Selected file:</strong> <span id="fileName"></span> (<span id="fileSize"></span>)
+                </div>
+
+                <div class="mt-20">
+                    <button id="uploadBtn" class="btn btn-primary" onclick="uploadCSV()" disabled>
+                        Upload & Import
+                    </button>
+                    <button id="cancelBtn" class="btn btn-danger hidden" onclick="cancelUpload()" style="margin-left: 10px;">
+                        Cancel
+                    </button>
+                </div>
+
+                <div id="progressContainer" class="progress-container hidden">
+                    <progress id="uploadProgress" value="0" max="100"></progress>
+                    <div id="progressText" class="text-center mt-20">Ready to upload</div>
+                </div>
+
+                <div id="statusLog" class="status-log hidden"></div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div id="productsSection" class="tab-section hidden">
+            <h2 class="section-title">📦 Product Management</h2>
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #856404;"><strong>💡 Features:</strong> Advanced search & filtering • Prefix-match SKU search • Bulk operations • Real-time updates • Individual or mass delete</p>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Search (Name/Description)</label>
+                    <input type="text" id="searchInput" placeholder="Search products..." onkeypress="if(event.key==='Enter') loadProducts(1)">
+                </div>
+                <div class="filter-group">
+                    <label>SKU</label>
+                    <input type="text" id="skuFilter" placeholder="Filter by SKU" onkeypress="if(event.key==='Enter') loadProducts(1)">
+                </div>
+                <div class="filter-group">
+                    <label>Active Status</label>
+                    <select id="activeFilter" onchange="loadProducts(1)">
+                        <option value="">All</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary" onclick="loadProducts(1)">Apply Filters</button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button class="btn btn-success" onclick="openCreateProductModal()">+ Create Product</button>
+                <button class="btn btn-danger" onclick="confirmBulkDelete()">🗑️ Delete All Products</button>
+                <div style="flex: 1;"></div>
+                <div id="bulkActions" class="hidden" style="display: flex; gap: 10px; align-items: center;">
+                    <span id="selectedCount" style="color: #007bff; font-weight: bold;">0 selected</span>
+                    <button class="btn btn-danger" onclick="deleteSelectedProducts()">🗑️ Delete Selected</button>
+                    <button class="btn btn-secondary" onclick="clearSelection()">Clear</button>
+                </div>
+            </div>
+
+            <div id="productsTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+                            <th>ID</th>
+                            <th>SKU</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button class="btn btn-secondary" id="prevPageBtn" onclick="previousPage()">← Previous</button>
+                <span class="page-info" id="pageInfo">Page 1</span>
+                <button class="btn btn-secondary" id="nextPageBtn" onclick="nextPage()">Next →</button>
+            </div>
+        </div>
+
+        <!-- Webhooks Section -->
+        <div id="webhooksSection" class="tab-section hidden">
+            <h2 class="section-title">🔔 Webhook Management</h2>
+            <div style="background: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <p style="margin: 0; color: #0c5460;"><strong>💡 Features:</strong> Real-time event notifications • HTTP POST callbacks • Product CRUD events • Test webhooks • Response logging • Enable/disable toggle</p>
+            </div>
+
+            <div class="mb-20">
+                <button class="btn btn-success" onclick="openCreateWebhookModal()">+ Create Webhook</button>
+            </div>
+
+            <div id="webhooksTable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>URL</th>
+                            <th>Event</th>
+                            <th>Enabled</th>
+                            <th>Last Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="webhooksTableBody">
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Product Modal -->
+    <div id="createProductModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Product</h3>
+                <button class="close-btn" onclick="closeModal('createProductModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>SKU *</label>
+                <input type="text" id="newProductSku" placeholder="e.g., PROD-001">
+            </div>
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" id="newProductName" placeholder="Product name">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="newProductDesc" placeholder="Product description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Price</label>
+                <input type="number" id="newProductPrice" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="newProductActive" checked> Active
+                </label>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('createProductModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createProduct()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Product</h3>
+                <button class="close-btn" onclick="closeModal('editProductModal')">&times;</button>
+            </div>
+            <input type="hidden" id="editProductId">
+            <div class="form-group">
+                <label>SKU *</label>
+                <input type="text" id="editProductSku">
+            </div>
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" id="editProductName">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="editProductDesc"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Price</label>
+                <input type="number" id="editProductPrice" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="editProductActive"> Active
+                </label>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('editProductModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="updateProduct()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Webhook Modal -->
+    <div id="createWebhookModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Webhook</h3>
+                <button class="close-btn" onclick="closeModal('createWebhookModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" id="newWebhookName" placeholder="My Webhook">
+            </div>
+            <div class="form-group">
+                <label>URL *</label>
+                <input type="text" id="newWebhookUrl" placeholder="https://example.com/webhook">
+            </div>
+            <div class="form-group">
+                <label>Event *</label>
+                <select id="newWebhookEvent">
+                    <option value="product.created">product.created</option>
+                    <option value="product.updated">product.updated</option>
+                    <option value="product.deleted">product.deleted</option>
+                    <option value="import.completed">import.completed</option>
+                    <option value="test">test</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="newWebhookEnabled" checked> Enabled
+                </label>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('createWebhookModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="createWebhook()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Webhook Modal -->
+    <div id="editWebhookModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit Webhook</h3>
+                <button class="close-btn" onclick="closeModal('editWebhookModal')">&times;</button>
+            </div>
+            <input type="hidden" id="editWebhookId">
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" id="editWebhookName">
+            </div>
+            <div class="form-group">
+                <label>URL *</label>
+                <input type="text" id="editWebhookUrl">
+            </div>
+            <div class="form-group">
+                <label>Event *</label>
+                <select id="editWebhookEvent">
+                    <option value="product.created">product.created</option>
+                    <option value="product.updated">product.updated</option>
+                    <option value="product.deleted">product.deleted</option>
+                    <option value="import.completed">import.completed</option>
+                    <option value="test">test</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="editWebhookEnabled"> Enabled
+                </label>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeModal('editWebhookModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="updateWebhook()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentPage = 1;
+        let currentTab = 'upload';
+        let selectedFile = null;
+        let currentXHR = null;
+        let currentEventSource = null;
+        let currentJobId = null;
+
+        // API base URL
+        const API_BASE = window.location.origin + '/api';
+
+        // ============================================================================
+        // Tab Navigation
+        // ============================================================================
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Hide all sections
+            document.querySelectorAll('.tab-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected section
+            if (tabName === 'upload') {
+                document.getElementById('uploadSection').classList.remove('hidden');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            } else if (tabName === 'products') {
+                document.getElementById('productsSection').classList.remove('hidden');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                loadProducts(1);
+            } else if (tabName === 'webhooks') {
+                document.getElementById('webhooksSection').classList.remove('hidden');
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                loadWebhooks();
+            }
+        }
+
+        // ============================================================================
+        // CSV Upload
+        // ============================================================================
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.name.endsWith('.csv')) {
+                showError('Please select a CSV file');
+                return;
+            }
+            
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatBytes(file.size);
+            document.getElementById('fileInfo').classList.remove('hidden');
+            document.getElementById('uploadBtn').disabled = false;
+        }
+
+        async function uploadCSV() {
+            if (!selectedFile) return;
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const progressBar = document.getElementById('uploadProgress');
+            const progressText = document.getElementById('progressText');
+            const progressContainer = document.getElementById('progressContainer');
+            const statusLog = document.getElementById('statusLog');
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = 'Uploading...';
+            cancelBtn.classList.remove('hidden');
+            progressContainer.classList.remove('hidden');
+            statusLog.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                // Upload with progress tracking
+                currentXHR = new XMLHttpRequest();
+                
+                // Track upload progress
+                currentXHR.upload.addEventListener('progress', (e) => {
+                    if (e.lengthComputable) {
+                        const percentComplete = Math.round((e.loaded / e.total) * 100);
+                        progressBar.value = percentComplete;
+                        progressText.textContent = `Uploading file: ${percentComplete}% (${formatBytes(e.loaded)} / ${formatBytes(e.total)})`;
+                        if (percentComplete % 10 === 0) {
+                            addStatusLog(`📤 Upload progress: ${percentComplete}%`);
+                        }
+                    }
+                });
+
+                // Handle upload completion
+                const uploadPromise = new Promise((resolve, reject) => {
+                    currentXHR.onload = () => {
+                        if (currentXHR.status >= 200 && currentXHR.status < 300) {
+                            try {
+                                resolve(JSON.parse(currentXHR.responseText));
+                            } catch (e) {
+                                reject(new Error('Invalid server response'));
+                            }
+                        } else {
+                            try {
+                                const error = JSON.parse(currentXHR.responseText);
+                                reject(new Error(error.detail || 'Upload failed'));
+                            } catch {
+                                reject(new Error(`Upload failed with status ${currentXHR.status}`));
+                            }
+                        }
+                    };
+                    currentXHR.onerror = () => reject(new Error('Network error'));
+                    currentXHR.onabort = () => reject(new Error('Upload cancelled'));
+                    currentXHR.ontimeout = () => reject(new Error('Upload timeout'));
+                });
+
+                currentXHR.open('POST', `${API_BASE}/upload`);
+                currentXHR.timeout = 300000; // 5 minute timeout for large files
+                currentXHR.send(formData);
+
+                const data = await uploadPromise;
+                
+                progressBar.value = 100;
+                addStatusLog('✓ File uploaded successfully. Job ID: ' + data.id);
+                addStatusLog('⏳ Importing in Progress...');
+                progressText.innerHTML = '<strong>Processing CSV file...</strong><br><small>Please wait while we process your data</small>';
+
+                // Store job ID for cancellation
+                currentJobId = data.id;
+
+                // Listen to import progress
+                listenToProgress(data.id);
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                if (error.message !== 'Upload cancelled') {
+                    showError('Upload failed: ' + error.message);
+                    addStatusLog('✗ Upload failed: ' + error.message);
+                }
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload & Import';
+                cancelBtn.classList.add('hidden');
+                currentXHR = null;
+            }
+        }
+
+        function cancelUpload() {
+            // Abort file upload if in progress
+            if (currentXHR) {
+                currentXHR.abort();
+                currentXHR = null;
+                addStatusLog('⚠ File upload cancelled');
+            }
+            
+            // Cancel import job if running
+            if (currentJobId) {
+                fetch(`${API_BASE}/jobs/${currentJobId}/cancel`, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addStatusLog('⚠ Import job cancellation requested');
+                    showError('Import cancelled');
+                })
+                .catch(error => {
+                    console.error('Cancel error:', error);
+                    addStatusLog('⚠ Failed to cancel job: ' + error.message);
+                });
+                
+                currentJobId = null;
+            }
+            
+            // Close SSE connection
+            if (currentEventSource) {
+                currentEventSource.close();
+                currentEventSource = null;
+            }
+            
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').textContent = 'Upload & Import';
+            document.getElementById('cancelBtn').classList.add('hidden');
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function listenToProgress(jobId) {
+            currentEventSource = new EventSource(`${API_BASE}/progress/${jobId}`);
+            const progressBar = document.getElementById('uploadProgress');
+            const progressText = document.getElementById('progressText');
+            let startTime = Date.now();
+
+            currentEventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.status === 'connected') {
+                        addStatusLog('📡 Connected to progress stream');
+                        startTime = Date.now();
+                    } else if (data.status === 'processing') {
+                        const percent = data.percent || 0;
+                        const processed = data.processed || 0;
+                        const inserted = data.inserted || 0;
+                        const updated = data.updated || 0;
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const rate = elapsed > 0 ? Math.round(processed / elapsed) : 0;
+                        
+                        // Update progress bar
+                        progressBar.value = percent;
+                        
+                        // Update progress text with detailed info
+                        progressText.innerHTML = `
+                            <strong style="color: #007bff; font-size: 18px;">${percent}% Complete</strong><br>
+                            <strong>${data.message || 'Processing...'}</strong><br>
+                            <small>
+                                📊 Processed: <strong>${processed.toLocaleString()}</strong> rows | 
+                                ⚡ Speed: <strong>${rate.toLocaleString()}</strong> rows/sec | 
+                                ⏱️ Time: <strong>${elapsed}s</strong><br>
+                                ✨ New: <strong>${inserted.toLocaleString()}</strong> | 
+                                🔄 Updated: <strong>${updated.toLocaleString()}</strong>
+                            </small>
+                        `;
+                        
+                        // Log every 10% progress
+                        if (processed % 50000 === 0 || percent % 10 === 0) {
+                            addStatusLog(`⚙️ ${percent}% - ${data.message || 'Processing...'} (${rate.toLocaleString()} rows/sec)`);
+                        }
+                    } else if (data.status === 'complete') {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const processed = data.processed || 0;
+                        const inserted = data.inserted || 0;
+                        const updated = data.updated || 0;
+                        const avgRate = processed > 0 ? Math.round(processed / elapsed) : 0;
+                        
+                        progressBar.value = 100;
+                        progressText.innerHTML = `
+                            <strong>✓ Import completed!</strong><br>
+                            <small>Total: ${processed.toLocaleString()} rows | New: ${inserted.toLocaleString()} | Updated: ${updated.toLocaleString()} | Time: ${elapsed}s | Avg: ${avgRate.toLocaleString()} rows/sec</small>
+                        `;
+                        addStatusLog(`✓ ${data.message || 'Import complete!'}`);
+                        addStatusLog(`📊 Statistics: ${processed.toLocaleString()} total, ${inserted.toLocaleString()} new, ${updated.toLocaleString()} updated in ${elapsed}s`);
+                        currentEventSource.close();
+                        currentEventSource = null;
+                        document.getElementById('cancelBtn').classList.add('hidden');
+                        resetUploadForm();
+                    } else if (data.status === 'error') {
+                        progressText.textContent = '✗ Import failed';
+                        addStatusLog(`✗ Error: ${data.error || data.message}`);
+                        showError(data.error || data.message);
+                        currentEventSource.close();
+                        currentEventSource = null;
+                        document.getElementById('cancelBtn').classList.add('hidden');
+                        resetUploadForm();
+                    }
+                } catch (e) {
+                    console.error('Error parsing progress:', e);
+                }
+            };
+
+            currentEventSource.onerror = () => {
+                addStatusLog('⚠ Connection lost');
+                currentEventSource.close();
+                currentEventSource = null;
+            };
+        }
+
+        function addStatusLog(message) {
+            const log = document.getElementById('statusLog');
+            const line = document.createElement('div');
+            line.className = 'status-log-line';
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(line);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function resetUploadForm() {
+            setTimeout(() => {
+                document.getElementById('uploadBtn').disabled = false;
+                document.getElementById('uploadBtn').textContent = 'Upload & Import';
+            }, 2000);
+        }
+
+        // ============================================================================
+        // Products
+        // ============================================================================
+        async function loadProducts(page) {
+            currentPage = page;
+            const searchInput = document.getElementById('searchInput').value;
+            const skuFilter = document.getElementById('skuFilter').value;
+            const activeFilter = document.getElementById('activeFilter').value;
+
+            let url = `${API_BASE}/products?page=${page}&page_size=20`;
+            if (searchInput) url += `&q=${encodeURIComponent(searchInput)}`;
+            if (skuFilter) url += `&sku=${encodeURIComponent(skuFilter)}`;
+            if (activeFilter) url += `&active=${activeFilter}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to load products');
+                
+                const data = await response.json();
+                renderProductsTable(data);
+                updatePagination(data);
+            } catch (error) {
+                showError('Failed to load products: ' + error.message);
+            }
+        }
+
+        function renderProductsTable(data) {
+            const tbody = document.getElementById('productsTableBody');
+            
+            if (data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.items.map(product => `
+                <tr>
+                    <td><input type="checkbox" class="product-checkbox" value="${product.id}" onchange="updateBulkActions()"></td>
+                    <td>${product.id}</td>
+                    <td>${escapeHtml(product.sku)}</td>
+                    <td>${escapeHtml(product.name)}</td>
+                    <td>${product.price ? '$' + Number(product.price).toFixed(2) : '-'}</td>
+                    <td>${product.active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="openEditProductModal(${product.id})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteProduct(${product.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            updateBulkActions();
+        }
+
+        function updatePagination(data) {
+            document.getElementById('pageInfo').textContent = `Page ${data.page} of ${data.pages} (${data.total.toLocaleString()} total)`;
+            document.getElementById('prevPageBtn').disabled = data.page === 1;
+            document.getElementById('nextPageBtn').disabled = data.page >= data.pages;
+        }
+
+        function previousPage() {
+            if (currentPage > 1) loadProducts(currentPage - 1);
+        }
+
+        function nextPage() {
+            loadProducts(currentPage + 1);
+        }
+
+        function openCreateProductModal() {
+            document.getElementById('createProductModal').classList.remove('hidden');
+        }
+
+        async function createProduct() {
+            const sku = document.getElementById('newProductSku').value.trim();
+            const name = document.getElementById('newProductName').value.trim();
+            const description = document.getElementById('newProductDesc').value.trim();
+            const price = document.getElementById('newProductPrice').value;
+            const active = document.getElementById('newProductActive').checked;
+
+            if (!sku || !name) {
+                showError('SKU and Name are required');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/products`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        sku, name, description,
+                        price: price ? parseFloat(price) : null,
+                        active
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create product');
+                }
+
+                closeModal('createProductModal');
+                showSuccess('Product created successfully');
+                loadProducts(currentPage);
+                
+                // Clear form
+                document.getElementById('newProductSku').value = '';
+                document.getElementById('newProductName').value = '';
+                document.getElementById('newProductDesc').value = '';
+                document.getElementById('newProductPrice').value = '';
+                document.getElementById('newProductActive').checked = true;
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function openEditProductModal(id) {
+            try {
+                const response = await fetch(`${API_BASE}/products/${id}`);
+                if (!response.ok) throw new Error('Failed to load product');
+                
+                const product = await response.json();
+                
+                document.getElementById('editProductId').value = product.id;
+                document.getElementById('editProductSku').value = product.sku;
+                document.getElementById('editProductName').value = product.name;
+                document.getElementById('editProductDesc').value = product.description || '';
+                document.getElementById('editProductPrice').value = product.price || '';
+                document.getElementById('editProductActive').checked = product.active;
+                
+                document.getElementById('editProductModal').classList.remove('hidden');
+            } catch (error) {
+                showError('Failed to load product: ' + error.message);
+            }
+        }
+
+        async function updateProduct() {
+            const id = document.getElementById('editProductId').value;
+            const sku = document.getElementById('editProductSku').value.trim();
+            const name = document.getElementById('editProductName').value.trim();
+            const description = document.getElementById('editProductDesc').value.trim();
+            const price = document.getElementById('editProductPrice').value;
+            const active = document.getElementById('editProductActive').checked;
+
+            try {
+                const response = await fetch(`${API_BASE}/products/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        sku, name, description,
+                        price: price ? parseFloat(price) : null,
+                        active
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update product');
+                }
+
+                closeModal('editProductModal');
+                showSuccess('Product updated successfully');
+                loadProducts(currentPage);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/products/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to delete product');
+                }
+
+                showSuccess('Product deleted successfully');
+                loadProducts(currentPage);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function confirmBulkDelete() {
+            if (!confirm('⚠️ WARNING: This will DELETE ALL PRODUCTS. This action cannot be undone. Are you absolutely sure?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/products/bulk-delete`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to start bulk delete');
+                }
+
+                const data = await response.json();
+                showSuccess('Bulk delete started. Tracking progress...');
+                
+                // Switch to upload tab to show progress
+                switchTab('upload');
+                document.getElementById('progressContainer').classList.remove('hidden');
+                document.getElementById('statusLog').classList.remove('hidden');
+                addStatusLog('🗑️ Starting bulk delete of all products...');
+                
+                listenToProgress(data.job_id);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.product-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateBulkActions();
+        }
+
+        function updateBulkActions() {
+            const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+            const count = checkboxes.length;
+            const bulkActions = document.getElementById('bulkActions');
+            const selectedCount = document.getElementById('selectedCount');
+            const selectAll = document.getElementById('selectAll');
+            
+            if (count > 0) {
+                bulkActions.classList.remove('hidden');
+                selectedCount.textContent = `${count} selected`;
+            } else {
+                bulkActions.classList.add('hidden');
+            }
+            
+            // Update select all checkbox
+            const allCheckboxes = document.querySelectorAll('.product-checkbox');
+            selectAll.checked = allCheckboxes.length > 0 && count === allCheckboxes.length;
+            selectAll.indeterminate = count > 0 && count < allCheckboxes.length;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.product-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkActions();
+        }
+
+        async function deleteSelectedProducts() {
+            const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            
+            if (ids.length === 0) return;
+            
+            if (!confirm(`Are you sure you want to delete ${ids.length} selected product(s)?`)) {
+                return;
+            }
+
+            let deleted = 0;
+            let failed = 0;
+            
+            for (const id of ids) {
+                try {
+                    const response = await fetch(`${API_BASE}/products/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        deleted++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
+            }
+            
+            if (deleted > 0) {
+                showSuccess(`Successfully deleted ${deleted} product(s)${failed > 0 ? `, ${failed} failed` : ''}`);
+                loadProducts(currentPage);
+                clearSelection();
+            } else {
+                showError('Failed to delete products');
+            }
+        }
+
+        // ============================================================================
+        // Webhooks
+        // ============================================================================
+        async function loadWebhooks() {
+            try {
+                const response = await fetch(`${API_BASE}/webhooks`);
+                if (!response.ok) throw new Error('Failed to load webhooks');
+                
+                const webhooks = await response.json();
+                renderWebhooksTable(webhooks);
+            } catch (error) {
+                showError('Failed to load webhooks: ' + error.message);
+            }
+        }
+
+        function renderWebhooksTable(webhooks) {
+            const tbody = document.getElementById('webhooksTableBody');
+            
+            if (webhooks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No webhooks configured</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = webhooks.map(webhook => `
+                <tr>
+                    <td>${webhook.id}</td>
+                    <td>${escapeHtml(webhook.name)}</td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(webhook.url)}</td>
+                    <td>${escapeHtml(webhook.event)}</td>
+                    <td>${webhook.enabled ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-danger">No</span>'}</td>
+                    <td>${webhook.last_status ? `<span class="badge ${webhook.last_status >= 200 && webhook.last_status < 300 ? 'badge-success' : 'badge-danger'}">${webhook.last_status}</span>` : '-'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="openEditWebhookModal(${webhook.id})">Edit</button>
+                        <button class="btn btn-primary btn-small" onclick="testWebhook(${webhook.id})">Test</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteWebhook(${webhook.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openCreateWebhookModal() {
+            document.getElementById('createWebhookModal').classList.remove('hidden');
+        }
+
+        async function createWebhook() {
+            const name = document.getElementById('newWebhookName').value.trim();
+            const url = document.getElementById('newWebhookUrl').value.trim();
+            const event = document.getElementById('newWebhookEvent').value;
+            const enabled = document.getElementById('newWebhookEnabled').checked;
+
+            if (!name || !url) {
+                showError('Name and URL are required');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/webhooks`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, url, event, enabled})
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to create webhook');
+                }
+
+                closeModal('createWebhookModal');
+                showSuccess('Webhook created successfully');
+                loadWebhooks();
+                
+                // Clear form
+                document.getElementById('newWebhookName').value = '';
+                document.getElementById('newWebhookUrl').value = '';
+                document.getElementById('newWebhookEnabled').checked = true;
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function openEditWebhookModal(id) {
+            try {
+                const response = await fetch(`${API_BASE}/webhooks/${id}`);
+                if (!response.ok) throw new Error('Failed to load webhook');
+                
+                const webhook = await response.json();
+                
+                document.getElementById('editWebhookId').value = webhook.id;
+                document.getElementById('editWebhookName').value = webhook.name;
+                document.getElementById('editWebhookUrl').value = webhook.url;
+                document.getElementById('editWebhookEvent').value = webhook.event;
+                document.getElementById('editWebhookEnabled').checked = webhook.enabled;
+                
+                document.getElementById('editWebhookModal').classList.remove('hidden');
+            } catch (error) {
+                showError('Failed to load webhook: ' + error.message);
+            }
+        }
+
+        async function updateWebhook() {
+            const id = document.getElementById('editWebhookId').value;
+            const name = document.getElementById('editWebhookName').value.trim();
+            const url = document.getElementById('editWebhookUrl').value.trim();
+            const event = document.getElementById('editWebhookEvent').value;
+            const enabled = document.getElementById('editWebhookEnabled').checked;
+
+            try {
+                const response = await fetch(`${API_BASE}/webhooks/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, url, event, enabled})
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to update webhook');
+                }
+
+                closeModal('editWebhookModal');
+                showSuccess('Webhook updated successfully');
+                loadWebhooks();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function deleteWebhook(id) {
+            if (!confirm('Are you sure you want to delete this webhook?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/webhooks/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to delete webhook');
+                }
+
+                showSuccess('Webhook deleted successfully');
+                loadWebhooks();
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        async function testWebhook(id) {
+            try {
+                const response = await fetch(`${API_BASE}/webhooks/${id}/test`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Failed to test webhook');
+                }
+
+                const data = await response.json();
+                showSuccess(data.message || 'Webhook test dispatched');
+                
+                // Reload webhooks after a delay to show updated status
+                setTimeout(() => loadWebhooks(), 2000);
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        // ============================================================================
+        // Utility Functions
+        // ============================================================================
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showError(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-error';
+            alertDiv.textContent = 'Error: ' + message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success';
+            alertDiv.textContent = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.maxWidth = '400px';
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Close modals when clicking outside
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
