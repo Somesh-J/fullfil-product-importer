@@ -36,6 +36,11 @@ target_metadata = Base.metadata
 def get_url():
     """Get database URL from environment variable"""
     url = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/products")
+    
+    # Railway provides postgresql:// but we need postgresql+asyncpg://
+    if url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
     return url
 
 
